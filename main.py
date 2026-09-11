@@ -33,9 +33,23 @@ def seoul(response: Response, lineId: Optional[str] = None):
     payload = {"service": "cartRoute", "line": id, "time": r, "value": a}
 
     response = requests.post(url, json=payload, headers=headers)
+    data = decrypt_data(lineId, response.text)
 
-    return [response.text]
+    return data
 
+
+
+def decrypt_data(e, i):
+    key = base64.b64decode(keys.SECRET_FIRST)
+    iv = base64.b64decode(keys.SECRET_THRID)
+    ciphertext = base64.b64decode(i)
+
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    decrypted_bytes = cipher.decrypt(ciphertext)
+    decrypted_bytes = decrypted_bytes[:-decrypted_bytes[-1]]
+    o = decrypted_bytes.decode("utf-8")
+
+    return json.loads(o) if len(o) > 0 and e in ("BR", "Y", "R", "G", "O", "BL") else []
 
 def get_stn_list():
     if lineId == 'BR': return [
