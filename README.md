@@ -1,6 +1,10 @@
 # 중화민국 지하철 실시간 위치
 © 2026 Dark Tornado, All rights reserved.
 
+# Before use
+```sh
+$ pip install fastapi pycryptodome
+```
 
 ## 타이베이 첩운
  - [ ] 원후선
