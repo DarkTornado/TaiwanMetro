@@ -35,6 +35,60 @@ def seoul(response: Response, lineId: Optional[str] = None):
     response = requests.post(url, json=payload, headers=headers)
     data = decrypt_data(lineId, response.text)
 
+    for i, e in enumerate(data):
+        updn = e['cDirection']
+        status = '도착'
+        stn_id = e['cNumberStn']
+
+        if '-' in stn_id:
+            stn_ids = stn_id.split('-')
+            stn_id = stn_ids[0] if updn == 'up' else stn_ids[1]
+            status = '접근'
+
+        # 모든 노선의 상/하행이 반대로 나옴
+        updn = 'down' if updn == 'up' else 'up'
+
+        # 신베이터우 지선 (R)
+        if lineId == 'R':
+            pos = e['cPosition']
+            if pos == 200:
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '064b'
+                status = '도착'
+            elif pos == 201:
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '064b' if updn == 'up' else '065'
+                status = '접근'
+            elif pos == 202:
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '065'
+                status = '도착'
+
+        # 샤오비탄 지선 (G)
+        elif lineId == 'G':
+            pos = e['cPosition']
+            if pos == 302:  # div의 id와 백엔드에서 주는 id가 다름
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '035b'
+                status = '도착'
+            elif pos == 301:
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '035b' if updn == 'up' else '032'
+                status = '접근'
+            elif pos == 300:
+                updn = 'down' if updn == 'up' else 'up'
+                stn_id = '032'
+                status = '도착'
+
+        dest_name = e.get('cDestName')
+        data[i] = {
+            'updn': updn,
+            'no': e.get('sPVID') if e.get('sPVID') else e.get('cNumber'),
+            'stnId': stn_id,
+            'dest': dest_name,
+            'status': status,
+        }
+        
     return data
 
 
