@@ -88,8 +88,33 @@ def seoul(response: Response, lineId: Optional[str] = None):
             'dest': dest_name,
             'status': status,
         }
+    
+    stns = get_stn_list(lineId)
+    result = []
+    for stn in stns:
+        stn_id = stn['id']
         
-    return data
+        # 해당 역의 id와 일치하는 열차 데이터를 상/하행별로 분류
+        up_trains = [
+            {'no': e['no'], 'dest': e['dest'], 'status': e['status']}
+            for e in data if e.get('stnId') == stn_id and e.get('updn') == 'up'
+        ]
+        
+        down_trains = [
+            {'no': e['no'], 'dest': e['dest'], 'status': e['status']}
+            for e in data if e.get('stnId') == stn_id and e.get('updn') == 'down'
+        ]
+        
+        result.append({
+            'stn': {
+                'ko': stn['ko'],
+                'tw': stn['tw']
+            },
+            'up': up_trains,
+            'down': down_trains
+        })
+        
+    return result
 
 
 
@@ -105,7 +130,7 @@ def decrypt_data(e, i):
 
     return json.loads(o) if len(o) > 0 and e in ("BR", "Y", "R", "G", "O", "BL") else []
 
-def get_stn_list():
+def get_stn_list(lineId):
     if lineId == 'BR': return [
             {'ko': '동물원', 'tw': '動物園', 'id': '019'},
             {'ko': '무자', 'tw': '木柵', 'id': '018'},
