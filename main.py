@@ -8,7 +8,7 @@ from Crypto.Cipher import AES
 app = FastAPI()
 
 @app.get("/subway/taipei")
-def seoul(response: Response, lineId: Optional[str] = None):
+def taipei(response: Response, lineId: Optional[str] = None):
     response.headers['Access-Control-Allow-Origin'] = '*'
 
     internalIds = {
