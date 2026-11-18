@@ -6,4 +6,7 @@ app = FastAPI()
 
 @app.get("/subway/taipei")
 def get_taipei(response: Response, lineId: Optional[str] = None):
+
+    if lineId == 'A' : return taipei.taoyuan()
+
     return taipei.mrt(lineId)

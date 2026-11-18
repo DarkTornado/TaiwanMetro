@@ -274,3 +274,67 @@ def get_stn_list(lineId):
             {'ko': '싱푸', 'tw': '幸福', 'id': '212'},
             {'ko': '신베이산업단지', 'tw': '新北產業園區', 'id': '213'}
         ]
+
+
+def taoyuan():  # https://www.tymetro.com.tw/tymetro-new/kr/_pages/travel-guide/dynamictraininfo.php
+    url = 'https://www.tymetro.com.tw/tymetro-new/kr/_pages/travel-guide/getimmediatestatus_cache.php'
+    response = requests.post(url)
+    json = response.json()
+
+    types = {
+        'COM': '보통',
+        'EXP': '직통'
+    }
+    dests = {
+        'A1': '타이베이역',
+        'A12': '공항 터미널 1',
+        'A13': '공항 터미널 2',
+        'A22': '라오제시'
+    }
+    uds = {
+        'N': 'up',
+        'S': 'dn'
+    }
+
+    data = []
+    for datum in json['Payload']:
+        status = '도착'
+        stn = datum['location']
+        if '-' in stn:
+            stn = stn.split('-')
+            if stn[0] != stn[1]: status = '접근'
+            stn = stn[1]
+        
+
+        data.append({
+            'no': datum['train_no'],
+            'type': types[datum['CAR_TYPE']],
+            'stn': stn,
+            'dest': dests[datum['DESTINATION']],
+            'status': status,
+            'ud': uds[datum['direction']]
+        })
+
+    result = []
+    stns = [{'ko': '타이베이역', 'tw': '台北車站', 'id': 'A01'}, {'ko': '싼충', 'tw': '三重', 'id': 'A02'}, {'ko': '신베이산업단지', 'tw': '新北產業園區', 'id': 'A03'}, {'ko': '신좡부도심', 'tw': '新莊副都心', 'id': 'A04'}, {'ko': '타이산', 'tw': '泰山', 'id': 'A05'}, {'ko': '타이산구이허', 'tw': '泰山貴和', 'id': 'A06'}, {'ko': '국립타이완 체육대학', 'tw': '體育大學', 'id': 'A07'}, {'ko': '창겅병원', 'tw': '長庚醫院', 'id': 'A08'}, {'ko': '린커우', 'tw': '林口', 'id': 'A09'}, {'ko': '산비', 'tw': '山鼻', 'id': 'A10'}, {'ko': '컹커우', 'tw': '坑口', 'id': 'A11'}, {'ko': '공항 터미널 1', 'tw': '機場第一航廈', 'id': 'A12'}, {'ko': '공항 터미널 2', 'tw': '機場第二航廈', 'id': 'A13'}, {'ko': '공항호텔', 'tw': '機場旅館', 'id': 'A14a'}, {'ko': '다위안', 'tw': '大園', 'id': 'A15'}, {'ko': '헝산', 'tw': '橫山', 'id': 'A16'}, {'ko': '링항', 'tw': '領航', 'id': 'A17'}, {'ko': '타오위안 고속철도역', 'tw': '高鐵桃園站', 'id': 'A18'}, {'ko': '타오위안 체육공원', 'tw': '桃園體育園區', 'id': 'A19'}, {'ko': '싱난', 'tw': '興南', 'id': 'A20'}, {'ko': '환베이', 'tw': '環北', 'id': 'A21'}, {'ko': '라오제시', 'tw': '老街溪', 'id': 'A22'}]
+    for i in range(0, len(stns)):
+        stn = stns[i]
+        result.append({
+            'stn': {
+                'ko': stn['ko'],
+                'tw': stn['tw']
+            },
+            'up': [],
+            'dn': []
+        })
+
+        for train in data:
+            if train['stn'] == stns[i]['id']:
+                result[i][train['ud']].append({
+                    'no': train['no'],
+                    'type': train['type'],
+                    'status': train['status'],
+                    'dest': train['dest']
+                })
+
+    return result
